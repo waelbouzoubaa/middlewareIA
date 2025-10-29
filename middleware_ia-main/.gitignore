@@ -1,0 +1,23 @@
+﻿# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.env.*
+*.sqlite3
+
+# Node / front
+node_modules/
+dist/
+build/
+coverage/
+
+# OS / Editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Docker
+*.log

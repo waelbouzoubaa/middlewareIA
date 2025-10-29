@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Middleware IA • Insights Environnementaux</title>
+  <link rel="stylesheet" href="./style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+</head>
+<body class="page page-insights">
+  <header class="topbar">
+    <a class="ghost" href="./index.html">← Accueil</a>
+    <h1>🌍 Insights Environnementaux</h1>
+    <div class="spacer"></div>
+    <button id="btnRefresh" class="ghost">🔄 Rafraîchir</button>
+  </header>
+
+  <main class="insights-container">
+    <!-- Hero Metrics -->
+    <section class="hero-metrics">
+      <div class="metric-card carbon">
+        <div class="metric-icon">🌱</div>
+        <div class="metric-content">
+          <div class="metric-value" id="totalCarbon">0</div>
+          <div class="metric-label">gCO₂eq émis</div>
+          <div class="metric-trend" id="carbonTrend"></div>
+        </div>
+      </div>
+
+      <div class="metric-card energy">
+        <div class="metric-icon">⚡</div>
+        <div class="metric-content">
+          <div class="metric-value" id="totalEnergy">0</div>
+          <div class="metric-label">kWh consommés</div>
+          <div class="metric-trend" id="energyTrend"></div>
+        </div>
+      </div>
+
+      <div class="metric-card requests">
+        <div class="metric-icon">🤖</div>
+        <div class="metric-content">
+          <div class="metric-value" id="totalRequests">0</div>
+          <div class="metric-label">requêtes IA</div>
+          <div class="metric-trend" id="requestsTrend"></div>
+        </div>
+      </div>
+
+      <div class="metric-card efficiency">
+        <div class="metric-icon">💚</div>
+        <div class="metric-content">
+          <div class="metric-value" id="avgCarbon">0</div>
+          <div class="metric-label">gCO₂eq/requête</div>
+          <div class="metric-trend" id="efficiencyTrend"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Timeline Carbon -->
+    <section class="insight-section">
+      <div class="section-header">
+        <h2>📈 Évolution des émissions</h2>
+        <div class="section-controls">
+          <button class="ghost small active" data-granularity="day">Jour</button>
+          <button class="ghost small" data-granularity="hour">Heure</button>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="timelineChart"></canvas>
+      </div>
+    </section>
+
+    <!-- Model Comparison -->
+    <section class="insight-section">
+      <h2>⚙️ Comparaison des modèles</h2>
+      <div class="models-grid" id="modelsGrid">
+        <!-- Rempli dynamiquement -->
+      </div>
+    </section>
+
+    <!-- Heatmap & Equivalents -->
+    <div class="insights-row">
+      <section class="insight-section half">
+        <h2>🔥 Intensité horaire</h2>
+        <div class="heatmap-container" id="heatmapContainer">
+          <!-- Rempli dynamiquement -->
+        </div>
+      </section>
+
+      <section class="insight-section half">
+        <h2>🌍 Équivalents tangibles</h2>
+        <div class="equivalents-list" id="equivalentsList">
+          <!-- Rempli dynamiquement -->
+        </div>
+      </section>
+    </div>
+
+    <!-- Recommendations -->
+    <section class="insight-section recommendations">
+      <h2>💡 Recommandations personnalisées</h2>
+      <div class="recommendations-grid" id="recommendationsGrid">
+        <!-- Rempli dynamiquement -->
+      </div>
+    </section>
+  </main>
+
+  <script src="./insights.js"></script>
+</body>
+</html>

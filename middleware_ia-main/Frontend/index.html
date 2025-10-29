@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Middleware IA • Sélection du fournisseur</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body class="page page-index">
+  <header class="topbar">
+    <h1>🧠 Middleware IA</h1>
+    <div class="spacer"></div>
+    <button id="btnSettings" class="ghost">⚙️ API</button>
+  </header>
+
+  <main class="container center">
+    <h2>Choisis ton fournisseur IA</h2>
+    <p class="muted small">Sélectionne le moteur que tu souhaites utiliser pour ta session de chat.</p>
+
+    <div class="providers">
+      <a href="./chat.html?provider=openai" class="provider-card openai">
+        <div class="icon">🧠</div>
+        <h3>OpenAI</h3>
+        <p>Modèles GPT (4o, 4-Turbo, 5)</p>
+      </a>
+
+      <a href="./chat.html?provider=mistral" class="provider-card mistral">
+        <div class="icon">🌀</div>
+        <h3>Mistral</h3>
+        <p>Modèles Mixtral, Small</p>
+      </a>
+
+      <!-- 🌿 Nouvelle carte Insights -->
+      <a href="./insights.html" class="provider-card insights">
+        <div class="icon">🌍</div>
+        <h3>Insights Environnementaux</h3>
+        <p>Analyse de ton empreinte carbone et de la consommation IA</p>
+      </a>
+    </div>
+  </main>
+
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-card">
+      <h3>Configuration API</h3>
+      <label class="field">
+        <span>Base URL de l'API FastAPI</span>
+        <input id="apiBaseInput" type="text" placeholder="http://localhost:8010" />
+      </label>
+      <div class="row end gap">
+        <button id="btnCloseSettings" class="ghost">Annuler</button>
+        <button id="btnSaveSettings" class="primary">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>

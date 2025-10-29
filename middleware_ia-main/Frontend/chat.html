@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Middleware IA • Chat</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body class="page page-chat">
+  <header class="topbar">
+    <a class="ghost" href="./index.html">← Fournisseurs</a>
+    <div class="row gap">
+      <strong id="currentModelLabel">Modèle</strong>
+      <span id="usageStats" class="badge muted"></span>
+    </div>
+    <div class="spacer"></div>
+    <button id="btnSettings" class="ghost">⚙️ API</button>
+  </header>
+
+  <main class="chat-layout">
+    <aside class="sidebar">
+      <h3>Modèles disponibles</h3>
+
+      <div class="model-select">
+        <label for="modelSelect">Choisir le modèle :</label>
+        <select id="modelSelect"></select>
+      </div>
+
+
+      
+    </aside>
+
+    <section class="chat-panel">
+      <div id="chatLog" class="chat-log"></div>
+
+      <form id="chatForm" class="composer">
+        <textarea id="chatInput" rows="2" placeholder="Écris ton message... (Shift+Entrée = retour ligne)"></textarea>
+        <div class="row gap">
+          <button id="btnClear" type="button" class="ghost">🗑️ Nouveau chat</button>
+          <div class="spacer"></div>
+          <button id="btnSend" class="primary">Envoyer</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-card">
+      <h3>Configuration API</h3>
+      <label class="field">
+        <span>Base URL de l'API FastAPI</span>
+        <input id="apiBaseInput" type="text" placeholder="http://localhost:8010" />
+      </label>
+      <div class="row end gap">
+        <button id="btnCloseSettings" class="ghost">Annuler</button>
+        <button id="btnSaveSettings" class="primary">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ CDN Marked.js pour parser le Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

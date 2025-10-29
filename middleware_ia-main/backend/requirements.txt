@@ -1,0 +1,14 @@
+# fastapi et cie...
+fastapi==0.110.0
+uvicorn[standard]==0.29.0
+python-dotenv==1.0.1
+pydantic==2.7.0
+requests==2.32.3
+
+# SDKs
+openai==1.32.0
+mistralai==0.4.0
+ecologits==0.8.2
+
+python-multipart>=0.0.9
+pillow>=10.4.0
