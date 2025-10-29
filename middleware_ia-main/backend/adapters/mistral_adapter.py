@@ -1,3 +1,10 @@
+import os
+from typing import List, Dict, Any
+from mistralai.client import MistralClient
+from adapters.base import BaseAdapter         # ✅ <-- import manquant
+from adapters.carbon_adapter import estimate_carbon
+
+
 class MistralAdapter(BaseAdapter):
     """Adapter pour le fournisseur Mistral (avec calcul d'empreinte carbone)."""
 
@@ -12,26 +19,37 @@ class MistralAdapter(BaseAdapter):
         model_id = model.split(":", 1)[1] if ":" in model else model
 
         try:
+            # 🔧 On reformate les messages pour éviter les erreurs JSON
             formatted_messages = []
             for m in messages:
                 if isinstance(m, dict):
-                    formatted_messages.append({"role": m["role"], "content": m["content"]})
+                    formatted_messages.append({
+                        "role": m["role"],
+                        "content": m["content"]
+                    })
                 elif hasattr(m, "dict"):
                     formatted_messages.append(m.dict())
                 else:
                     formatted_messages.append({"role": "user", "content": str(m)})
 
+            # Appel à l’API Mistral
             response = self.client.chat(model=model_id, messages=formatted_messages)
 
+            # Extraction du contenu
             content = ""
             if response and response.choices:
                 msg = response.choices[0].message
-                content = msg["content"] if isinstance(msg, dict) else getattr(msg, "content", "").strip()
+                if isinstance(msg, dict):
+                    content = msg.get("content", "").strip()
+                else:
+                    content = getattr(msg, "content", "").strip()
 
+            # Récupération des tokens
             usage = getattr(response, "usage", None)
             input_tokens = getattr(usage, "prompt_tokens", 0) if usage else 0
             output_tokens = getattr(usage, "completion_tokens", 0) if usage else 0
 
+            # Calcul empreinte carbone
             carbon_data = estimate_carbon(model, input_tokens, output_tokens)
 
             return {
