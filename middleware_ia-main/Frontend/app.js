@@ -1,4 +1,3 @@
-
 // CONFIGURATION GLOBALE
 
 const qs = new URLSearchParams(location.search);
@@ -8,10 +7,10 @@ const API_BASE = (localStorage.getItem('API_BASE') || 'http://72.60.189.114:8010
 // Configuration de Marked.js pour un rendu sécurisé et propre
 if (typeof marked !== 'undefined') {
   marked.setOptions({
-    breaks: true,        // Convertit les retours à la ligne en <br>
-    gfm: true,          // GitHub Flavored Markdown
-    headerIds: false,   // Pas d'IDs auto dans les titres
-    mangle: false       // Garde les emails lisibles
+    breaks: true,
+    gfm: true,
+    headerIds: false,
+    mangle: false
   });
 }
 
@@ -22,11 +21,9 @@ function openSettings() {
   $('#settingsModal')?.classList.remove('hidden');
   $('#apiBaseInput').value = API_BASE;
 }
-
 function closeSettings() {
   $('#settingsModal')?.classList.add('hidden');
 }
-
 function saveSettings() {
   const val = $('#apiBaseInput').value.trim();
   if (val) {
@@ -35,13 +32,12 @@ function saveSettings() {
     location.reload();
   }
 }
-
 $('#btnSettings')?.addEventListener('click', openSettings);
 $('#btnCloseSettings')?.addEventListener('click', closeSettings);
 $('#btnSaveSettings')?.addEventListener('click', saveSettings);
 
 
-// REQUÊTE API
+// REQUÊTE API JSON
 
 async function apiPost(path, body) {
   const resp = await fetch(`${API_BASE}${path}`, {
@@ -49,12 +45,10 @@ async function apiPost(path, body) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
-  
   if (!resp.ok) {
     const txt = await resp.text();
     throw new Error(`POST ${path} -> ${resp.status} ${txt}`);
   }
-  
   return resp.json();
 }
 
@@ -65,7 +59,9 @@ const state = {
   provider: qs.get('provider') || 'openai',
   model: null,
   messages: [],
-  sending: false
+  sending: false,
+  file: null,                 // ✅ fichier sélectionné
+  fileName: ''                // ✅ nom affiché
 };
 
 
@@ -156,11 +152,9 @@ function renderMessages() {
     const bubbleDiv = document.createElement('div');
 
     if (msg.role === 'assistant' && typeof marked !== 'undefined') {
-      // Parse Markdown → HTML pour les réponses IA
       bubbleDiv.className = 'bubble markdown-body';
       bubbleDiv.innerHTML = marked.parse(msg.content);
     } else {
-      // Texte brut pour l'utilisateur/système
       bubbleDiv.className = 'bubble';
       bubbleDiv.textContent = msg.content;
     }
@@ -174,56 +168,107 @@ function renderMessages() {
 }
 
 
-// ENVOI D'UN MESSAGE AU MODÈLE
+// UTILITAIRES FICHIER (badge + reset)
+
+function updateFileBadge() {
+  const badge = $('#fileBadge');
+  if (state.file) {
+    badge.textContent = `Fichier: ${state.fileName}`;
+    badge.style.display = 'inline-block';
+  } else {
+    badge.textContent = '';
+    badge.style.display = 'none';
+  }
+}
+function clearSelectedFile() {
+  state.file = null;
+  state.fileName = '';
+  const input = $('#fileInput');
+  if (input) input.value = '';
+  updateFileBadge();
+}
+
+
+// ENVOI D'UN MESSAGE (avec ou sans fichier)
 
 async function sendMessage() {
   if (state.sending || !state.model) return;
 
   const input = $('#chatInput');
   const text = (input.value || '').trim();
-  if (!text) return;
 
-  // Ajoute le message utilisateur
-  state.messages.push({ role: 'user', content: text });
+  // rien à envoyer ?
+  if (!text && !state.file) return;
+
+  // on affiche côté utilisateur ce qu'il envoie
+  if (text) {
+    state.messages.push({ role: 'user', content: text });
+  }
+  if (state.file) {
+    state.messages.push({ role: 'user', content: `📎 Fichier joint : ${state.fileName}` });
+  }
   input.value = '';
   renderMessages();
 
-  // Désactive le bouton pendant l'envoi
+  // état UI
   state.sending = true;
   const btnSend = $('#btnSend');
+  const btnUpload = $('#btnUpload');
   btnSend.disabled = true;
+  btnUpload.disabled = true;
   btnSend.textContent = 'Envoi...';
 
   try {
-    const body = {
-      user_id: 'webclient',
-      model: state.model,
-      messages: state.messages,
-      stream: false
-    };
+    let resp;
+    if (state.file) {
+      // ==== ENVOI MULTIPART /chat/upload ====
+      const formData = new FormData();
+      formData.append('model', state.model);
+      formData.append('messages', JSON.stringify(state.messages));
+      formData.append('file', state.file);
 
-    const resp = await apiPost('/chat', body);
+      const r = await fetch(`${API_BASE}/chat/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      if (!r.ok) {
+        const txt = await r.text();
+        throw new Error(`POST /chat/upload -> ${r.status} ${txt}`);
+      }
+      resp = await r.json();
 
-    // Ajoute la réponse de l'assistant
+      // le fichier est traité : on clean la sélection
+      clearSelectedFile();
+
+    } else {
+      // ==== ENVOI JSON /chat ====
+      const body = {
+        user_id: 'webclient',
+        model: state.model,
+        messages: state.messages,
+        stream: false
+      };
+      resp = await apiPost('/chat', body);
+    }
+
+    // Ajout de la réponse modèle
     state.messages.push({
       role: 'assistant',
       content: resp?.content || '(Aucune réponse)'
     });
-
     renderMessages();
     renderUsage(resp);
 
   } catch (e) {
-    // Affiche l'erreur dans le chat
     state.messages.push({
       role: 'assistant',
       content: `⚠️ Erreur: ${e.message}`
     });
     renderMessages();
   } finally {
-    // Réactive le bouton
     state.sending = false;
     btnSend.disabled = false;
+    btnUpload.disabled = false;
     btnSend.textContent = 'Envoyer';
   }
 }
@@ -234,9 +279,10 @@ async function sendMessage() {
 function initChat() {
   if (!$('.chat-layout')) return;
 
-  // Bouton "Nouveau chat"
+  // Nouveau chat
   $('#btnClear')?.addEventListener('click', () => {
     state.messages = [];
+    clearSelectedFile();
     renderMessages();
     $('#usageStats').textContent = '';
   });
@@ -255,10 +301,23 @@ function initChat() {
     }
   });
 
+  // Gestion fichier
+  $('#btnUpload')?.addEventListener('click', () => $('#fileInput').click());
+  $('#fileInput')?.addEventListener('change', e => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      clearSelectedFile();
+      return;
+    }
+    state.file = file;
+    state.fileName = file.name;
+    updateFileBadge();
+  });
+
   initModelSelect();
 }
 
 
-// DÉMARRAGE DE L'APPLICATION
+// DÉMARRAGE
 
 initChat();
