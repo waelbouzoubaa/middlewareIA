@@ -20,22 +20,24 @@
   <main class="chat-layout">
     <aside class="sidebar">
       <h3>Modèles disponibles</h3>
-
       <div class="model-select">
         <label for="modelSelect">Choisir le modèle :</label>
         <select id="modelSelect"></select>
       </div>
-
-
-      
     </aside>
 
     <section class="chat-panel">
       <div id="chatLog" class="chat-log"></div>
 
-      <form id="chatForm" class="composer">
+      <form id="chatForm" class="composer" enctype="multipart/form-data">
         <textarea id="chatInput" rows="2" placeholder="Écris ton message... (Shift+Entrée = retour ligne)"></textarea>
+
         <div class="row gap">
+          <!-- Input fichier (caché) + bouton d’action + badge nom de fichier -->
+          <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg" style="display:none" />
+          <button id="btnUpload" type="button" class="ghost">📎 Joindre un fichier</button>
+          <span id="fileBadge" class="badge muted" style="display:none"></span>
+
           <button id="btnClear" type="button" class="ghost">🗑️ Nouveau chat</button>
           <div class="spacer"></div>
           <button id="btnSend" class="primary">Envoyer</button>
@@ -58,7 +60,7 @@
     </div>
   </div>
 
-  <!-- ✅ CDN Marked.js pour parser le Markdown -->
+  <!-- Parser Markdown pour les réponses IA -->
   <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
   <script src="./app.js"></script>
 </body>
