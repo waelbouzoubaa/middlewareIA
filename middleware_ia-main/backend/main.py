@@ -182,3 +182,42 @@ async def chat_with_file(
             pass
 
     return result
+
+
+ 
+#  Génération d’images (OpenAI DALL·E 3)
+
+from openai import OpenAI
+
+@app.post("/image/generate")
+async def generate_image(
+    prompt: str = Form(...),
+    size: str = Form("1024x1024"),
+    model: str = Form("dall-e-3"),
+):
+    """
+    Génère une image à partir d'un texte via OpenAI.
+    - prompt : description textuelle de l'image
+    - size : 256x256, 512x512, 1024x1024
+    - model : dall-e-2 ou dall-e-3
+    """
+    try:
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise HTTPException(status_code=500, detail="Clé API OpenAI absente du .env")
+
+        client = OpenAI(api_key=api_key)
+
+        response = client.images.generate(
+            model=model,
+            prompt=prompt,
+            size=size,
+            n=1,
+            quality="standard"
+        )
+
+        image_url = response.data[0].url
+        return {"prompt": prompt, "image_url": image_url}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur génération image : {str(e)}")
